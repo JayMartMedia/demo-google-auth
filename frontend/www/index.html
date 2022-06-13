@@ -11,24 +11,7 @@
 </head>
 
 <body>
-  <script>
-    function handleCredentialResponse(response) {
-      console.log("Encoded JWT ID token: " + response.credential);
-      window.jwt = response.credential;
-    }
-    window.onload = function () {
-      google.accounts.id.initialize({
-        client_id: "403706356522-9l5kmo3oujjk8ho182ec3kts8k96d935.apps.googleusercontent.com",
-        callback: handleCredentialResponse
-      });
-      google.accounts.id.renderButton(
-        document.getElementById("buttonDiv"),
-        { theme: "outline", size: "large" }  // customization attributes
-      );
-      google.accounts.id.prompt(); // also display the One Tap dialog
-    }
-  </script>
-  <div id="buttonDiv"></div>
+  <div id="google_login_btn"></div>
   <button id="send_secure_request_btn">Send Secure Request</button>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </body>

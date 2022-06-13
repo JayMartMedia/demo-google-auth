@@ -1,3 +1,22 @@
+function handleCredentialResponse(response) {
+  console.log("Response", response);
+  console.log("Encoded JWT ID token: " + response.credential);
+  window.jwt = response.credential;
+}
+
+// setup listeners for google auth
+window.onload = function () {
+  google.accounts.id.initialize({
+    client_id: "403706356522-9l5kmo3oujjk8ho182ec3kts8k96d935.apps.googleusercontent.com",
+    callback: handleCredentialResponse
+  });
+  google.accounts.id.renderButton(
+    document.getElementById("google_login_btn"),
+    { theme: "outline", size: "large" }  // customization attributes
+  );
+  google.accounts.id.prompt(); // also display the One Tap dialog
+}
+
 // add onclick listener to button
 window.addEventListener("load", () => {
   const btn = document.querySelectorAll("#send_secure_request_btn").item(0);
