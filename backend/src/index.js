@@ -1,19 +1,24 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
-const app = express();
+const swaggerUi = require("swagger-ui-express");
 
 // setup constants
 const port = 4401
 const privateSigningKey = "thisisasecret";
 
 // setup express
+const app = express();
 app.use(cors({
   origin: [
     "http://localhost:4400"
   ]
 }));
 app.use(express.json());
+
+// setup swagger
+const swaggerDocument = require('./swagger.json');
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // configure google auth
 const { OAuth2Client } = require("google-auth-library");
@@ -162,6 +167,7 @@ app.post("/invalidate", async (req, res) => {
   try {
     const refreshToken = req.body.refreshToken;
     invalidateRefreshToken(refreshToken);
+    res.sendStatus(204).send();
   } catch (e) {
     console.error(e);
     res.sendStatus(500).send();
