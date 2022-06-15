@@ -1,5 +1,5 @@
-function removeMatchesFromImmutableArray(arr, predicate){
-    let index = 0;
+export function removeMatchesFromImmutableArray (arr: Array<any>, predicate: (any) => boolean): void {
+    let index: number = 0;
     while(index < arr.length){
         const item = arr[index]
         if(predicate(item)){
@@ -9,7 +9,3 @@ function removeMatchesFromImmutableArray(arr, predicate){
         }
     }
 }
-
-module.exports = {
-  removeMatchesFromImmutableArray
-};

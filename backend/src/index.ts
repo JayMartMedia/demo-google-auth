@@ -1,12 +1,12 @@
-const express = require("express");
-const cors = require("cors");
-const jwt = require("jsonwebtoken");
-const swaggerUi = require("swagger-ui-express");
-const { removeMatchesFromImmutableArray } = require("./utils/removeMatchesFromImmutableArray.js");
+import * as express from "express";
+import * as cors from "cors";
+import * as jwt from "jsonwebtoken";
+import * as swaggerUi from "swagger-ui-express";
+import { removeMatchesFromImmutableArray } from "./utils/removeMatchesFromImmutableArray";
 
 // setup constants
-const port = 4401
-const privateSigningKey = "thisisasecret";
+const port: number = 4401
+const privateSigningKey: string = "thisisasecret";
 
 // setup express
 const app = express();
@@ -25,38 +25,47 @@ app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 const { OAuth2Client } = require("google-auth-library");
 const CLIENT_ID = "403706356522-9l5kmo3oujjk8ho182ec3kts8k96d935.apps.googleusercontent.com";
 const client = new OAuth2Client(CLIENT_ID);
-const refreshTokens = [];
-const usedGoogleJwts = [];
 
-function addRefreshToken({user, token}) {
+type RefreshToken = {
+  user: string,
+  token: string
+}
+type GoogleJwt = {
+  token: string,
+  exp: number
+}
+const refreshTokens: RefreshToken[] = [];
+const usedGoogleJwts: GoogleJwt[] = [];
+
+function addRefreshToken({user, token}: RefreshToken): void {
   refreshTokens.push({
     user,
     token
   });
 }
 
-function invalidateRefreshToken(token) {
+function invalidateRefreshToken(token: string): void {
   const index = refreshTokens.findIndex(element => element.token === token);
   if (index !== -1) {
     refreshTokens.splice(index, 1);
   }
 }
 
-function invalidateRefreshTokensForUser(user) {
-  removeMatchesFromImmutableArray(refreshTokens, refreshToken => {
+function invalidateRefreshTokensForUser(user: string): void {
+  removeMatchesFromImmutableArray(refreshTokens, (refreshToken: RefreshToken) => {
     return refreshToken.user === user;
   });
 }
 
-function addUsedGoogleJwt(token, exp) {
+function addUsedGoogleJwt({token, exp}: GoogleJwt): void {
   usedGoogleJwts.push({token, exp});
 }
 
-function checkUsedGoogleJwt(token) {
+function checkUsedGoogleJwt(token: string): boolean {
   return usedGoogleJwts.some(usedGoogleJwt => usedGoogleJwt.token === token);
 }
 
-function generateAccessToken(data) {
+function generateAccessToken(data: any): string {
   const oneHourInSeconds = 60 * 60;
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
@@ -68,11 +77,11 @@ function generateAccessToken(data) {
     iat: issuedAtTime,
     exp: expiryTime
   }
-  const token = jwt.sign(payload, privateSigningKey, { algorithm: 'HS256' });
+  const token: string = jwt.sign(payload, privateSigningKey, { algorithm: 'HS256' });
   return token;
 }
 
-function generateRefreshToken(data) {
+function generateRefreshToken(data: any): string {
   const oneDayInSeconds = 60 * 60 * 24;
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
@@ -83,13 +92,13 @@ function generateRefreshToken(data) {
     iat: issuedAtTime,
     exp: expiryTime
   }
-  const token = jwt.sign(payload, privateSigningKey, { algorithm: 'HS256' });
+  const token: string = jwt.sign(payload, privateSigningKey, { algorithm: 'HS256' });
   return token;
 }
 
-function verifyRefreshToken(token) {
+function verifyRefreshToken(token: string): boolean {
   try {
-    const decoded = jwt.verify(token, privateSigningKey, { issuer: 'http://localhost:4401' });
+    const decoded: any = jwt.verify(token, privateSigningKey, { issuer: 'http://localhost:4401' });
     if (!refreshTokens.some(refreshToken => refreshToken.token === token)) {
       invalidateRefreshTokensForUser(decoded.email);
       throw new Error('Refresh token does not exist or has been invalidated');
@@ -101,9 +110,9 @@ function verifyRefreshToken(token) {
   }
 }
 
-function verifyAccessToken(token) {
+function verifyAccessToken(token: string): boolean {
   try {
-    const decoded = jwt.verify(token, privateSigningKey, { issuer: 'http://localhost:4401' });
+    const decoded: any = jwt.verify(token, privateSigningKey, { issuer: 'http://localhost:4401' });
     if (decoded.type !== "access") {
       throw new Error('Not a valid access token');
     }
@@ -114,7 +123,7 @@ function verifyAccessToken(token) {
   }
 }
 
-async function verifyGoogleJwt(token) {
+async function verifyGoogleJwt(token: string): Promise<boolean> {
   token = token.replace("Bearer ", "");
   try {
     const ticket = await client.verifyIdToken({
@@ -167,8 +176,8 @@ app.post("/token", async (req, res) => {
     return res.sendStatus(401);
   }
   if (await verifyGoogleJwt(googleJwt)) {
-    const payload = jwt.decode(googleJwt);
-    addUsedGoogleJwt(googleJwt, payload.exp);
+    const payload: any = jwt.decode(googleJwt);
+    addUsedGoogleJwt({token: googleJwt, exp: payload.exp});
     const newAccessToken = generateAccessToken(payload);
     const newRefreshToken = generateRefreshToken(payload);
     addRefreshToken({
@@ -187,7 +196,7 @@ app.post("/token", async (req, res) => {
 // get new refresh and access tokens using a refresh token
 app.post("/refresh", async (req, res) => {
   const refreshToken = req.body.refreshToken;
-  const payload = jwt.decode(refreshToken);
+  const payload: any = jwt.decode(refreshToken);
   if (verifyRefreshToken(refreshToken)) {
     const newAccessToken = generateAccessToken(payload);
     const newRefreshToken = generateRefreshToken(payload);
