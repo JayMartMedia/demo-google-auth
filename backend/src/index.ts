@@ -3,6 +3,7 @@ import * as cors from "cors";
 import * as jwt from "jsonwebtoken";
 import * as swaggerUi from "swagger-ui-express";
 import { removeMatchesFromImmutableArray } from "./utils/removeMatchesFromImmutableArray";
+import { AccessTokenPayload, GoogleJwtMeta, GoogleJwtPayload, RefreshTokenMeta, RefreshTokenPayload } from "./types/auth-interfaces";
 
 // setup constants
 const port: number = 4401
@@ -26,32 +27,6 @@ const { OAuth2Client } = require("google-auth-library");
 const CLIENT_ID = "403706356522-9l5kmo3oujjk8ho182ec3kts8k96d935.apps.googleusercontent.com";
 const client = new OAuth2Client(CLIENT_ID);
 
-type RefreshTokenMeta = {
-  user: string,
-  token: string,
-}
-type GoogleJwtMeta = {
-  token: string,
-  exp: number,
-}
-type RefreshTokenPayload = {
-  userId: string, // user id is in format of `{id of platform}:{email}` for example: g:email@gmail.com
-  iss: string,
-  iat: number,
-  exp: number,
-} & jwt.JwtPayload;
-type AccessTokenPayload = {
-  userId: string, // user id is in format of `{id of platform}:{email}` for example: g:email@gmail.com
-  iss: string,
-  iat: number,
-  exp: number,
-  type: string,
-} & jwt.JwtPayload;
-// the google jwt has many more fields, only adding the needed ones here
-type GoogleJwtPayload = {
-  email: string,
-  exp: number,
-} & jwt.JwtPayload;
 const refreshTokens: RefreshTokenMeta[] = [];
 const usedGoogleJwts: GoogleJwtMeta[] = [];
 
