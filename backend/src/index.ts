@@ -26,18 +26,36 @@ const { OAuth2Client } = require("google-auth-library");
 const CLIENT_ID = "403706356522-9l5kmo3oujjk8ho182ec3kts8k96d935.apps.googleusercontent.com";
 const client = new OAuth2Client(CLIENT_ID);
 
-type RefreshToken = {
+type RefreshTokenMeta = {
   user: string,
-  token: string
-}
-type GoogleJwt = {
   token: string,
-  exp: number
 }
-const refreshTokens: RefreshToken[] = [];
-const usedGoogleJwts: GoogleJwt[] = [];
+type GoogleJwtMeta = {
+  token: string,
+  exp: number,
+}
+type RefreshTokenPayload = {
+  userId: string, // user id is in format of `{id of platform}:{email}` for example: g:email@gmail.com
+  iss: string,
+  iat: number,
+  exp: number,
+} & jwt.JwtPayload;
+type AccessTokenPayload = {
+  userId: string, // user id is in format of `{id of platform}:{email}` for example: g:email@gmail.com
+  iss: string,
+  iat: number,
+  exp: number,
+  type: string,
+} & jwt.JwtPayload;
+// the google jwt has many more fields, only adding the needed ones here
+type GoogleJwtPayload = {
+  email: string,
+  exp: number,
+} & jwt.JwtPayload;
+const refreshTokens: RefreshTokenMeta[] = [];
+const usedGoogleJwts: GoogleJwtMeta[] = [];
 
-function addRefreshToken({user, token}: RefreshToken): void {
+function addRefreshTokenMeta({user, token}: RefreshTokenMeta): void {
   refreshTokens.push({
     user,
     token
@@ -52,12 +70,12 @@ function invalidateRefreshToken(token: string): void {
 }
 
 function invalidateRefreshTokensForUser(user: string): void {
-  removeMatchesFromImmutableArray(refreshTokens, (refreshToken: RefreshToken) => {
+  removeMatchesFromImmutableArray(refreshTokens, (refreshToken: RefreshTokenMeta) => {
     return refreshToken.user === user;
   });
 }
 
-function addUsedGoogleJwt({token, exp}: GoogleJwt): void {
+function addUsedGoogleJwtMeta({token, exp}: GoogleJwtMeta): void {
   usedGoogleJwts.push({token, exp});
 }
 
@@ -98,7 +116,7 @@ function generateRefreshToken(data: any): string {
 
 function verifyRefreshToken(token: string): boolean {
   try {
-    const decoded: any = jwt.verify(token, privateSigningKey, { issuer: 'http://localhost:4401' });
+    const decoded: RefreshTokenPayload = <RefreshTokenPayload>jwt.verify(token, privateSigningKey, { issuer: 'http://localhost:4401' });
     if (!refreshTokens.some(refreshToken => refreshToken.token === token)) {
       invalidateRefreshTokensForUser(decoded.email);
       throw new Error('Refresh token does not exist or has been invalidated');
@@ -112,7 +130,7 @@ function verifyRefreshToken(token: string): boolean {
 
 function verifyAccessToken(token: string): boolean {
   try {
-    const decoded: any = jwt.verify(token, privateSigningKey, { issuer: 'http://localhost:4401' });
+    const decoded: AccessTokenPayload = <AccessTokenPayload>jwt.verify(token, privateSigningKey, { issuer: 'http://localhost:4401' });
     if (decoded.type !== "access") {
       throw new Error('Not a valid access token');
     }
@@ -124,9 +142,9 @@ function verifyAccessToken(token: string): boolean {
 }
 
 async function verifyGoogleJwt(token: string): Promise<boolean> {
-  token = token.replace("Bearer ", "");
   try {
-    const ticket = await client.verifyIdToken({
+    token = token.replace("Bearer ", "");
+    await client.verifyIdToken({
       idToken: token,
       audience: CLIENT_ID
     });
@@ -176,11 +194,11 @@ app.post("/token", async (req, res) => {
     return res.sendStatus(401);
   }
   if (await verifyGoogleJwt(googleJwt)) {
-    const payload: any = jwt.decode(googleJwt);
-    addUsedGoogleJwt({token: googleJwt, exp: payload.exp});
+    const payload: GoogleJwtPayload = <GoogleJwtPayload>jwt.decode(googleJwt, {json: true});
+    addUsedGoogleJwtMeta({token: googleJwt, exp: payload.exp});
     const newAccessToken = generateAccessToken(payload);
     const newRefreshToken = generateRefreshToken(payload);
-    addRefreshToken({
+    addRefreshTokenMeta({
       user: payload.email,
       token: newRefreshToken
     });
@@ -196,12 +214,12 @@ app.post("/token", async (req, res) => {
 // get new refresh and access tokens using a refresh token
 app.post("/refresh", async (req, res) => {
   const refreshToken = req.body.refreshToken;
-  const payload: any = jwt.decode(refreshToken);
+  const payload: RefreshTokenPayload = <RefreshTokenPayload>jwt.decode(refreshToken, {json: true, complete: false});
   if (verifyRefreshToken(refreshToken)) {
     const newAccessToken = generateAccessToken(payload);
     const newRefreshToken = generateRefreshToken(payload);
     invalidateRefreshToken(refreshToken);
-    addRefreshToken({
+    addRefreshTokenMeta({
       user: payload.email,
       token: newRefreshToken
     });
