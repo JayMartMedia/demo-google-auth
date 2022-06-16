@@ -20,3 +20,7 @@ Must have app configured through Google APIs Console: https://developers.google.
 ### JWT Disadvantages
 - If an access token is intercepted or somehow (xss, etc.) retrieved from client, it cannot be invalidated
   - To mitigate this, use short expiry times (~15 minutes) on access tokens
+
+# Resources
+- https://hasura.io/blog/best-practices-of-using-jwt-with-graphql/
+- https://evertpot.com/jwt-is-a-bad-default/
