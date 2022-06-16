@@ -1,0 +1,28 @@
+import * as jwt from "jsonwebtoken";
+
+interface RefreshTokenMeta {
+  user: string,
+  token: string,
+}
+interface GoogleJwtMeta {
+  token: string,
+  exp: number,
+}
+interface RefreshTokenPayload extends jwt.JwtPayload {
+  userId: string, // user id is in format of `{id of platform}:{email}` for example: g:email@gmail.com
+  iss: string,
+  iat: number,
+  exp: number,
+}
+interface AccessTokenPayload extends jwt.JwtPayload {
+  userId: string, // user id is in format of `{id of platform}:{email}` for example: g:email@gmail.com
+  iss: string,
+  iat: number,
+  exp: number,
+  type: string,
+}
+// the google jwt has many more fields, only adding the needed ones here
+interface GoogleJwtPayload extends jwt.JwtPayload {
+  email: string,
+  exp: number,
+}
