@@ -64,24 +64,24 @@ function generateAccessToken(data: any): string {
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
   const expiryTime = issuedAtTime + quarterHourInSeconds;
-  const payload = {
-    ...data,
-    type: "access",
+  const payload: AccessTokenPayload = {
+    userId: data.userId,
     iss: issuer,
     iat: issuedAtTime,
-    exp: expiryTime
+    exp: expiryTime,
+    type: "access"
   }
   const token: string = jwt.sign(payload, privateSigningKey, { algorithm: 'HS256' });
   return token;
 }
 
-function generateRefreshToken(data: any): string {
+function generateRefreshToken(userId: string): string {
   const oneDayInSeconds = 60 * 60 * 24;
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
   const expiryTime = issuedAtTime + oneDayInSeconds;
-  const payload = {
-    ...data,
+  const payload: RefreshTokenPayload = {
+    userId: userId,
     iss: issuer,
     iat: issuedAtTime,
     exp: expiryTime
@@ -178,7 +178,7 @@ app.post("/token", async (req, res) => {
     const payload: GoogleJwtPayload = <GoogleJwtPayload>jwt.decode(googleJwt, {json: true});
     addUsedGoogleJwtMeta({token: googleJwt, exp: payload.exp});
     const newAccessToken = generateAccessToken(payload);
-    const newRefreshToken = generateRefreshToken(payload);
+    const newRefreshToken = generateRefreshToken(`g:${payload.email}`);
     addRefreshTokenMeta({
       user: payload.email,
       token: newRefreshToken
@@ -199,7 +199,7 @@ app.post("/refresh", async (req, res) => {
   const payload: RefreshTokenPayload = <RefreshTokenPayload>jwt.decode(refreshToken, {json: true, complete: false});
   if (verifyRefreshToken(refreshToken)) {
     const newAccessToken = generateAccessToken(payload);
-    const newRefreshToken = generateRefreshToken(payload);
+    const newRefreshToken = generateRefreshToken(payload.userId);
     invalidateRefreshToken(refreshToken);
     addRefreshTokenMeta({
       user: payload.email,
