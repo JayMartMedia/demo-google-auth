@@ -11,6 +11,7 @@ https://developers.google.com/identity/gsi/web/guides/verify-google-id-token
 > npm run tsc
 > npm start
 > ```
+> Server will now be up at [http://localhost:4401](http://localhost:4401), view the API spec in [Swagger](http://localhost:4401/swagger)
 
 ### To run with hot-reload (often used for development)
 > ```sh
@@ -23,3 +24,4 @@ https://developers.google.com/identity/gsi/web/guides/verify-google-id-token
 > # watch ./dist files, use nodemon to restart app when a file is changed
 > npm run start:dev
 > ```
+> Server will now be up at [http://localhost:4401](http://localhost:4401), view the API spec in [Swagger](http://localhost:4401/swagger)
