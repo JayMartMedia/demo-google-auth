@@ -2,6 +2,7 @@ import * as express from "express";
 import * as cors from "cors";
 import * as jwt from "jsonwebtoken";
 import * as swaggerUi from "swagger-ui-express";
+import * as swaggerDocument from "./swagger.json";
 import { removeMatchesFromImmutableArray } from "./utils/removeMatchesFromImmutableArray";
 import { timestring } from "./utils/dateUtils";
 import { AccessTokenPayload, GoogleJwtMeta, GoogleJwtPayload, RefreshTokenMeta, RefreshTokenPayload } from "./types/auth-interfaces";
@@ -20,7 +21,6 @@ app.use(cors({
 app.use(express.json());
 
 // setup swagger
-const swaggerDocument = require('./swagger.json');
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // configure google auth
@@ -31,7 +31,7 @@ const client = new OAuth2Client(CLIENT_ID);
 const refreshTokens: RefreshTokenMeta[] = [];
 const usedGoogleJwts: GoogleJwtMeta[] = [];
 
-function addRefreshTokenMeta({user, token}: RefreshTokenMeta): void {
+function addRefreshTokenMeta({ user, token }: RefreshTokenMeta): void {
   refreshTokens.push({
     user,
     token
@@ -51,15 +51,15 @@ function invalidateRefreshTokensForUser(user: string): void {
   });
 }
 
-function addUsedGoogleJwtMeta({token, exp}: GoogleJwtMeta): void {
-  usedGoogleJwts.push({token, exp});
+function addUsedGoogleJwtMeta({ token, exp }: GoogleJwtMeta): void {
+  usedGoogleJwts.push({ token, exp });
 }
 
 function checkUsedGoogleJwt(token: string): boolean {
   return usedGoogleJwts.some(usedGoogleJwt => usedGoogleJwt.token === token);
 }
 
-function generateAccessToken(data: {userId: string, picture: string}): string {
+function generateAccessToken(data: { userId: string, picture: string }): string {
   const quarterHourInSeconds = 60 * 15;
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
@@ -76,7 +76,7 @@ function generateAccessToken(data: {userId: string, picture: string}): string {
   return token;
 }
 
-function generateRefreshToken(data: {userId: string, picture: string}): string {
+function generateRefreshToken(data: { userId: string, picture: string }): string {
   const oneDayInSeconds = 60 * 60 * 24;
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
@@ -172,13 +172,13 @@ app.get("/secure", async (req, res) => {
 app.post("/token", async (req, res) => {
   console.log(`${timestring()}: Request to endpoint: /token`);
   const googleJwt = req.body.googleJwt;
-  if(!googleJwt) return res.sendStatus(401);
-  if(checkUsedGoogleJwt(googleJwt)) {
+  if (!googleJwt) return res.sendStatus(401);
+  if (checkUsedGoogleJwt(googleJwt)) {
     return res.sendStatus(401);
   }
   if (await verifyGoogleJwt(googleJwt)) {
-    const payload: GoogleJwtPayload = <GoogleJwtPayload>jwt.decode(googleJwt, {json: true});
-    addUsedGoogleJwtMeta({token: googleJwt, exp: payload.exp});
+    const payload: GoogleJwtPayload = <GoogleJwtPayload>jwt.decode(googleJwt, { json: true });
+    addUsedGoogleJwtMeta({ token: googleJwt, exp: payload.exp });
     const newAccessToken = generateAccessToken({ userId: `g:${payload.email}`, picture: payload.picture });
     const newRefreshToken = generateRefreshToken({ userId: `g:${payload.email}`, picture: payload.picture });
     addRefreshTokenMeta({
@@ -198,7 +198,7 @@ app.post("/token", async (req, res) => {
 app.post("/refresh", async (req, res) => {
   console.log(`${timestring()}: Request to endpoint: /refresh`);
   const refreshToken = req.body.refreshToken;
-  const payload: RefreshTokenPayload = <RefreshTokenPayload>jwt.decode(refreshToken, {json: true, complete: false});
+  const payload: RefreshTokenPayload = <RefreshTokenPayload>jwt.decode(refreshToken, { json: true, complete: false });
   if (verifyRefreshToken(refreshToken)) {
     const newAccessToken = generateAccessToken({ userId: payload.userId, picture: payload.picture });
     const newRefreshToken = generateRefreshToken({ userId: payload.userId, picture: payload.picture });
