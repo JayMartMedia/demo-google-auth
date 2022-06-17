@@ -1,0 +1,189 @@
+{
+	"info": {
+		"_postman_id": "c23fc006-bd86-459d-80a0-e087b202041c",
+		"name": "Demo Google Auth",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "check if access token is valid",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4401/secure",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4401",
+					"path": [
+						"secure"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "jwt with hs512",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzUxMiIsImtpZCI6Ijc0ODNhMDg4ZDRmZmMwMDYwOWYwZTIyZjNjMjJkYTVmZTM5MDZjY2MiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJuYmYiOjE2NTQ5MjY2NDgsImF1ZCI6IjQwMzcwNjM1NjUyMi05bDVrbW8zb3Vqams4aG8xODJlYzNrdHM4azk2ZDkzNS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjEwMDAzMTg4NTQzMjkyMjg3ODAwMCIsImVtYWlsIjoiam1hcnRAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImF6cCI6IjQwMzcwNjM1NjUyMi05bDVrbW8zb3Vqams4aG8xODJlYzNrdHM4azk2ZDkzNS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsIm5hbWUiOiJKZXNzZSBNYXJ0aW4iLCJwaWN0dXJlIjoiaHR0cHM6Ly9saDMuZ29vZ2xldXNlcmNvbnRlbnQuY29tL2EtL0FPaDE0R2d0bTUxT2NUWG5KdWllOUNLaVU3YTFyTkJxTWx1amtfUjRzRVluT1AwPXM5Ni1jIiwiZ2l2ZW5fbmFtZSI6Ikplc3NlIiwiZmFtaWx5X25hbWUiOiJNYXJ0aW4iLCJpYXQiOjE2NTQ5MjY5NDgsImV4cCI6MTY1NDkzMDU0OCwianRpIjoiYmFkYTU5YzcwNTVhOWZhMmM1Y2M0MGM4MGY2ZDUzODUzNDAyMWI3NCJ9.-7uAH1ljKgdcwnUt5Cq1ZyfI4WiOmBK4TeIJxxCWCt6AqqRcdiBQkn6bA4d8gWey0ajiFXTu67B-v0KsJYjP8A",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4401/secure",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4401",
+					"path": [
+						"secure"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "use google jwt to get refresh and access tokens",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"googleJwt\": \"eyJhbGciOiJSUzI1NiIsImtpZCI6IjU4MGFkYjBjMzJhMTc1ZDk1MGExYzE5MDFjMTgyZmMxNzM0MWRkYzQiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJuYmYiOjE2NTUzMTMxMTAsImF1ZCI6IjQwMzcwNjM1NjUyMi05bDVrbW8zb3Vqams4aG8xODJlYzNrdHM4azk2ZDkzNS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjEwMDAzMTg4NTQzMjkyMjg3ODAwMCIsImVtYWlsIjoid2F2ZXJpZGVyLmptYXJ0QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhenAiOiI0MDM3MDYzNTY1MjItOWw1a21vM291amprOGhvMTgyZWMza3RzOGs5NmQ5MzUuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJuYW1lIjoiSmVzc2UgTWFydGluIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hLS9BT2gxNEdndG01MU9jVFhuSnVpZTlDS2lVN2Exck5CcU1sdWprX1I0c0VZbk9QMD1zOTYtYyIsImdpdmVuX25hbWUiOiJKZXNzZSIsImZhbWlseV9uYW1lIjoiTWFydGluIiwiaWF0IjoxNjU1MzEzNDEwLCJleHAiOjE2NTUzMTcwMTAsImp0aSI6Ijg3NWIzM2I2ZGViY2FhNzJmYmI5NTRhNmI3YTlhMzc3ZDE0OWU5YWEifQ.SuR3KUyEcv2FgfkaKP6voUG1uiOhgCxLODkRaSeuzn51HawjkH6KdxSXMJJw07vPflVUnxkdd1IN6WCTHWR5snd71Dj_yZnLp5waApL7tmJ0Gt7jBkPtkilhXi7o8kD_LGJ2AVAOZAq5jzE_fcPozP0U8XpW9zbqnaW43YiGoAcT2Dbyjdn6yZhH7QTLkSy7Am2Bt-9LznZZ1hrBkNIFCq95tWrO_FY7p5uMAftPidW2ZZjYh84Dsn2ecabC3O2zhfC_3MVh50lOahZRNqnaAqpOudPWsL03aeqLneqHS9o2hYxJM4f5u8i0L7yglc_O109XkZn0OLFFiHJ-E49knA\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4401/token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4401",
+					"path": [
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "refresh tokens (gets new refresh and access token)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJnOndhdmVyaWRlci5qbWFydEBnbWFpbC5jb20iLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQ0MDEiLCJpYXQiOjE2NTU0MjgwNzEsImV4cCI6MTY1NTUxNDQ3MX0.BNXvwIfcCAmnMw54FLQe5UHWaWhDTWk-cs3l8jJBlh8\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4401/refresh",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4401",
+					"path": [
+						"refresh"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get list of refresh tokens",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4401/refreshtokens",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4401",
+					"path": [
+						"refreshtokens"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get list of used google jwts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4401/usedgooglejwts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4401",
+					"path": [
+						"usedgooglejwts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "invalidate token chain",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQ0MDEiLCJuYmYiOjE2NTUxNjE1NTYsImF1ZCI6IjQwMzcwNjM1NjUyMi05bDVrbW8zb3Vqams4aG8xODJlYzNrdHM4azk2ZDkzNS5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsInN1YiI6IjEwMDAzMTg4NTQzMjkyMjg3ODAwMCIsImVtYWlsIjoid2F2ZXJpZGVyLmptYXJ0QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJhenAiOiI0MDM3MDYzNTY1MjItOWw1a21vM291amprOGhvMTgyZWMza3RzOGs5NmQ5MzUuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJuYW1lIjoiSmVzc2UgTWFydGluIiwicGljdHVyZSI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hLS9BT2gxNEdndG01MU9jVFhuSnVpZTlDS2lVN2Exck5CcU1sdWprX1I0c0VZbk9QMD1zOTYtYyIsImdpdmVuX25hbWUiOiJKZXNzZSIsImZhbWlseV9uYW1lIjoiTWFydGluIiwiaWF0IjoxNjU1MTYyODMxLCJleHAiOjE2NTUyNDkyMzEsImp0aSI6IjRlOWEzNWU5MTE0YjQyMWJiNmU5ZDAxMzJkZTY0NGZkNTU3ZDNmOGUifQ.37KCSkMt2QMfZ1jSPVvrABioZt44FZY9J5Xk8UJsEpU\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4401/invalidate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4401",
+					"path": [
+						"invalidate"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
