@@ -3,6 +3,7 @@ import * as cors from "cors";
 import * as jwt from "jsonwebtoken";
 import * as swaggerUi from "swagger-ui-express";
 import { removeMatchesFromImmutableArray } from "./utils/removeMatchesFromImmutableArray";
+import { timestring } from "./utils/dateUtils";
 import { AccessTokenPayload, GoogleJwtMeta, GoogleJwtPayload, RefreshTokenMeta, RefreshTokenPayload } from "./types/auth-interfaces";
 
 // setup constants
@@ -59,28 +60,28 @@ function checkUsedGoogleJwt(token: string): boolean {
 }
 
 function generateAccessToken(data: any): string {
-  const oneHourInSeconds = 60 * 60;
+  const quarterHourInSeconds = 60 * 15;
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
-  const expiryTime = issuedAtTime + oneHourInSeconds;
-  const payload = {
-    ...data,
-    type: "access",
+  const expiryTime = issuedAtTime + quarterHourInSeconds;
+  const payload: AccessTokenPayload = {
+    userId: data.userId,
     iss: issuer,
     iat: issuedAtTime,
-    exp: expiryTime
+    exp: expiryTime,
+    type: "access"
   }
   const token: string = jwt.sign(payload, privateSigningKey, { algorithm: 'HS256' });
   return token;
 }
 
-function generateRefreshToken(data: any): string {
+function generateRefreshToken(userId: string): string {
   const oneDayInSeconds = 60 * 60 * 24;
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
   const expiryTime = issuedAtTime + oneDayInSeconds;
-  const payload = {
-    ...data,
+  const payload: RefreshTokenPayload = {
+    userId: userId,
     iss: issuer,
     iat: issuedAtTime,
     exp: expiryTime
@@ -132,21 +133,25 @@ async function verifyGoogleJwt(token: string): Promise<boolean> {
 
 // setup endpoints
 app.get("/helloworld", (req, res) => {
+  console.log(`${timestring()}: Request to endpoint: /helloworld`);
   return res.send("Hello World!")
 })
 
 // endpoint for debugging purposes
 app.get("/refreshtokens", (req, res) => {
+  console.log(`${timestring()}: Request to endpoint: /refreshtokens`);
   return res.send(refreshTokens);
 });
 
 // endpoint for debugging purposes
 app.get("/usedgooglejwts", (req, res) => {
+  console.log(`${timestring()}: Request to endpoint: /usedgooglejwts`);
   return res.send(usedGoogleJwts);
 })
 
 // secure endpoint to check whether access token in auth header is valid
 app.get("/secure", async (req, res) => {
+  console.log(`${timestring()}: Request to endpoint: /secure`);
   // TODO: convert to middleware
   try {
     const authHeader = req.headers.authorization;
@@ -163,6 +168,7 @@ app.get("/secure", async (req, res) => {
 
 // get new refresh and access tokens using a google JWT
 app.post("/token", async (req, res) => {
+  console.log(`${timestring()}: Request to endpoint: /token`);
   const googleJwt = req.body.googleJwt;
   if(!googleJwt) return res.sendStatus(401);
   if(checkUsedGoogleJwt(googleJwt)) {
@@ -172,7 +178,7 @@ app.post("/token", async (req, res) => {
     const payload: GoogleJwtPayload = <GoogleJwtPayload>jwt.decode(googleJwt, {json: true});
     addUsedGoogleJwtMeta({token: googleJwt, exp: payload.exp});
     const newAccessToken = generateAccessToken(payload);
-    const newRefreshToken = generateRefreshToken(payload);
+    const newRefreshToken = generateRefreshToken(`g:${payload.email}`);
     addRefreshTokenMeta({
       user: payload.email,
       token: newRefreshToken
@@ -188,11 +194,12 @@ app.post("/token", async (req, res) => {
 
 // get new refresh and access tokens using a refresh token
 app.post("/refresh", async (req, res) => {
+  console.log(`${timestring()}: Request to endpoint: /refresh`);
   const refreshToken = req.body.refreshToken;
   const payload: RefreshTokenPayload = <RefreshTokenPayload>jwt.decode(refreshToken, {json: true, complete: false});
   if (verifyRefreshToken(refreshToken)) {
     const newAccessToken = generateAccessToken(payload);
-    const newRefreshToken = generateRefreshToken(payload);
+    const newRefreshToken = generateRefreshToken(payload.userId);
     invalidateRefreshToken(refreshToken);
     addRefreshTokenMeta({
       user: payload.email,
@@ -209,6 +216,7 @@ app.post("/refresh", async (req, res) => {
 
 // invalidate a single refresh key (useful for logging out)
 app.post("/invalidate", async (req, res) => {
+  console.log(`${timestring()}: Request to endpoint: /invalidate`);
   try {
     const refreshToken = req.body.refreshToken;
     invalidateRefreshToken(refreshToken);
