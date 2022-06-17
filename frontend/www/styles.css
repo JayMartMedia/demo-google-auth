@@ -1,3 +1,38 @@
 html{
   background-color: lightblue;
 }
+
+#user-card {
+  background: white;
+  max-width: 300px;
+  padding: 1em;
+  border-radius: .5em;
+}
+
+#user-img-wrapper {
+  position: relative;
+}
+
+#user-img-wrapper::after {
+  content: "";
+  display: block;
+  padding-bottom: 100%;
+}
+
+#user-img {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 100%;
+}
+
+#user-id {
+  margin: 0px;
+  font-size: 2em;
+  text-align: center;
+}
+
+.hide {
+  display: none;
+}

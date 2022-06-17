@@ -1,9 +1,38 @@
 /* global window.accessToken, window.refreshToken, window.accessExp, apiHost*/
+function signIn(name, picture){
+  // hide google login button
+  document.querySelector("#google_login_btn").classList.add("hide");
+  // show login button
+  document.querySelector("#logout_btn").classList.remove("hide");
+  // show user-card
+  document.querySelector("#user-card").classList.remove("hide");
+  // show user details
+  if(name) {
+    document.querySelector('#user-id').innerHTML = name;
+  }
+  if(picture) {
+    document.querySelector('#user-img').setAttribute("src", picture);
+  }
+}
+
+function logout(){
+  window.accessToken = null;
+  window.refreshToken = null;
+  document.querySelector("#google_login_btn").classList.remove("hide");
+  document.querySelector("#logout_btn").classList.add("hide");
+  document.querySelector("#user-card").classList.add("hide");
+  document.querySelector("#user-card").classList.add("hide");
+  document.querySelector('#user-img').setAttribute("src", "");
+  document.querySelector('#user-id').innerHTML = "";
+  google.accounts.id.prompt();
+}
 
 // setup listeners for google auth
 function handleCredentialResponse(response) {
   const googleJwt = response.credential;
   getInternalTokens(googleJwt);
+  const payload = extractPayload(googleJwt);
+  signIn(payload.name, payload.picture);
 }
 
 window.onload = function () {
@@ -50,7 +79,6 @@ async function getInternalTokens(_googleJwt) {
   window.accessToken = json.accessToken;
   window.refreshToken = json.refreshToken;
   setClientAccessTokenExpireTime(json.accessToken);
-  console.log('logged in');
 }
 
 async function refreshTokens() {
@@ -70,9 +98,7 @@ async function refreshTokens() {
 }
 
 async function setClientAccessTokenExpireTime(_accessToken) {
-  const tokens = _accessToken.split(".");
-  const unencoded = atob(tokens[1]);
-  const payload = JSON.parse(unencoded);
+  const payload = extractPayload(_accessToken);
   window.accessTokenExpiry = payload.exp;
 }
 
@@ -87,4 +113,12 @@ async function refreshAccessTokenIfNeeded() {
   if(isAccessTokenExpired()){
     await refreshTokens()
   }
+}
+
+function extractPayload(jwt) {
+  const tokens = jwt.split(".");
+  // this atob may not work for decoding jwt?
+  const unencoded = atob(tokens[1]);
+  const payload = JSON.parse(unencoded);
+  return payload;
 }

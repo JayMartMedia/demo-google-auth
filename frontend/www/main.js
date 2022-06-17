@@ -8,6 +8,12 @@ window.addEventListener("load", () => {
   secure_request_btn.addEventListener("click", () => {
     handleSendSecureRequestBtnClick();
   });
+
+  // setup logout button
+  const logout_btn = document.querySelectorAll("#logout_btn").item(0);
+  logout_btn.addEventListener("click", () => {
+    logout();
+  });
 })
 
 // called when send_secure_request_btn is clicked

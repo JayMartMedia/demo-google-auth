@@ -59,13 +59,14 @@ function checkUsedGoogleJwt(token: string): boolean {
   return usedGoogleJwts.some(usedGoogleJwt => usedGoogleJwt.token === token);
 }
 
-function generateAccessToken(data: any): string {
+function generateAccessToken(data: {userId: string, picture: string}): string {
   const quarterHourInSeconds = 60 * 15;
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
   const expiryTime = issuedAtTime + quarterHourInSeconds;
   const payload: AccessTokenPayload = {
     userId: data.userId,
+    picture: data.picture,
     iss: issuer,
     iat: issuedAtTime,
     exp: expiryTime,
@@ -75,13 +76,14 @@ function generateAccessToken(data: any): string {
   return token;
 }
 
-function generateRefreshToken(userId: string): string {
+function generateRefreshToken(data: {userId: string, picture: string}): string {
   const oneDayInSeconds = 60 * 60 * 24;
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
   const expiryTime = issuedAtTime + oneDayInSeconds;
   const payload: RefreshTokenPayload = {
-    userId: userId,
+    userId: data.userId,
+    picture: data.picture,
     iss: issuer,
     iat: issuedAtTime,
     exp: expiryTime
@@ -177,8 +179,8 @@ app.post("/token", async (req, res) => {
   if (await verifyGoogleJwt(googleJwt)) {
     const payload: GoogleJwtPayload = <GoogleJwtPayload>jwt.decode(googleJwt, {json: true});
     addUsedGoogleJwtMeta({token: googleJwt, exp: payload.exp});
-    const newAccessToken = generateAccessToken(payload);
-    const newRefreshToken = generateRefreshToken(`g:${payload.email}`);
+    const newAccessToken = generateAccessToken({ userId: `g:${payload.email}`, picture: payload.picture });
+    const newRefreshToken = generateRefreshToken({ userId: `g:${payload.email}`, picture: payload.picture });
     addRefreshTokenMeta({
       user: payload.email,
       token: newRefreshToken
@@ -198,8 +200,8 @@ app.post("/refresh", async (req, res) => {
   const refreshToken = req.body.refreshToken;
   const payload: RefreshTokenPayload = <RefreshTokenPayload>jwt.decode(refreshToken, {json: true, complete: false});
   if (verifyRefreshToken(refreshToken)) {
-    const newAccessToken = generateAccessToken(payload);
-    const newRefreshToken = generateRefreshToken(payload.userId);
+    const newAccessToken = generateAccessToken({ userId: payload.userId, picture: payload.picture });
+    const newRefreshToken = generateRefreshToken({ userId: payload.userId, picture: payload.picture });
     invalidateRefreshToken(refreshToken);
     addRefreshTokenMeta({
       user: payload.email,
