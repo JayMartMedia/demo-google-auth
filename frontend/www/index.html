@@ -7,18 +7,19 @@
   <title>Page Title</title>
   <meta name='viewport' content='width=device-width, initial-scale=1'>
   <link rel='stylesheet' type='text/css' media='screen' href='styles.css'>
-  <script src='main.js'></script>
-  <script src='auth.js'></script>
+  <link rel='stylesheet' type='text/css' href='auth.css'>
+  <script src='main.js' defer></script>
+  <script src='auth.js' defer></script>
 </head>
 
 <body>
-  <div id="google_login_btn"></div>
-  <button id="send_secure_request_btn">Send Secure Request</button>
-  <button id="logout_btn" class="hide">Logout</button>
-  
-  <div class="hide" id="user-card">
+  <button onclick="handleSendSecureRequestBtnClick()">Send Secure Request</button>
+  <button onclick="window.auth.logout()" class="auth-show-logged-in auth-hide">Logout</button>
+
+  <div id="auth-google-login-btn" class="auth-show-logged-out auth-hide"></div>
+  <div class="auth-show-logged-in auth-hide" id="user-card">
     <div id="user-img-wrapper">
-      <img id="user-img" src=""/>
+      <img id="user-img" src="" />
     </div>
     <p id="user-id"></p>
   </div>
