@@ -8,6 +8,13 @@ document.addEventListener("logged-in", (obj) => {
   document.getElementById("user-img").setAttribute('src', userInfo.picture);
 });
 
+document.getElementById('logout-btn').addEventListener('click', function () {
+  window.auth.logout();
+});
+document.getElementById('send-secure-request-btn').addEventListener('click', () => {
+  handleSendSecureRequestBtnClick();
+});
+
 // called when send_secure_request_btn is clicked
 async function handleSendSecureRequestBtnClick() {
   try {
