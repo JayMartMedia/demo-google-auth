@@ -7,17 +7,13 @@ import { timestring } from "./utils/dateUtils";
 import { AccessTokenPayload, GoogleJwtPayload, RefreshTokenPayload } from "./types/auth-interfaces";
 import { ITokenRepository } from "./repository/ITokenRepository";
 import { tokenInMemoryRepository } from "./repository/tokenInMemoryRepository";
-
-// setup constants
-const port: number = 4401
-const privateSigningKey: string = "thisisasecret";
+import { OAuth2Client } from "google-auth-library";
+import { CLIENT_ID, ALLOWED_ORIGINS, PRIVATE_SIGNING_KEY, PORT, ISSUER, REFRESH_TOKEN_LENGTH, ACCESS_TOKEN_LENGTH } from "./constants";
 
 // setup express
 const app = express();
 app.use(cors({
-  origin: [
-    "http://localhost:4400"
-  ]
+  origin: ALLOWED_ORIGINS
 }));
 app.use(express.json());
 
@@ -25,52 +21,46 @@ app.use(express.json());
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // configure google auth
-const { OAuth2Client } = require("google-auth-library");
-const CLIENT_ID = "403706356522-9l5kmo3oujjk8ho182ec3kts8k96d935.apps.googleusercontent.com";
 const client = new OAuth2Client(CLIENT_ID);
 
 const tokenRepository: ITokenRepository = new tokenInMemoryRepository();
 
 function generateAccessToken(data: { userId: string, picture: string, name: string, email: string }): string {
-  const quarterHourInSeconds = 60 * 15;
-  const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
-  const expiryTime = issuedAtTime + quarterHourInSeconds;
+  const expiryTime = issuedAtTime + ACCESS_TOKEN_LENGTH;
   const payload: AccessTokenPayload = {
     userId: data.userId,
     name: data.name,
     email: data.email,
     picture: data.picture,
-    iss: issuer,
+    iss: ISSUER,
     iat: issuedAtTime,
     exp: expiryTime,
     type: "access"
   }
-  const token: string = jwt.sign(payload, privateSigningKey, { algorithm: 'HS256' });
+  const token: string = jwt.sign(payload, PRIVATE_SIGNING_KEY, { algorithm: 'HS256' });
   return token;
 }
 
 function generateRefreshToken(data: { userId: string, picture: string, name: string, email: string }): string {
-  const oneDayInSeconds = 60 * 60 * 24;
-  const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
-  const expiryTime = issuedAtTime + oneDayInSeconds;
+  const expiryTime = issuedAtTime + REFRESH_TOKEN_LENGTH;
   const payload: RefreshTokenPayload = {
     userId: data.userId,
     picture: data.picture,
     name: data.name,
     email: data.email,
-    iss: issuer,
+    iss: ISSUER,
     iat: issuedAtTime,
     exp: expiryTime
   }
-  const token: string = jwt.sign(payload, privateSigningKey, { algorithm: 'HS256' });
+  const token: string = jwt.sign(payload, PRIVATE_SIGNING_KEY, { algorithm: 'HS256' });
   return token;
 }
 
 async function verifyRefreshToken(token: string): Promise<boolean> {
   try {
-    const decoded: RefreshTokenPayload = <RefreshTokenPayload>jwt.verify(token, privateSigningKey, { issuer: 'http://localhost:4401' });
+    const decoded: RefreshTokenPayload = <RefreshTokenPayload>jwt.verify(token, PRIVATE_SIGNING_KEY, { issuer: ISSUER });
     if (!(await tokenRepository.checkForRefreshTokenMeta(token))) {
       await tokenRepository.deleteRefreshTokenMetasForUser(decoded.email);
       throw new Error('Refresh token does not exist or has been invalidated');
@@ -84,7 +74,7 @@ async function verifyRefreshToken(token: string): Promise<boolean> {
 
 function verifyAccessToken(token: string): boolean {
   try {
-    const decoded: AccessTokenPayload = <AccessTokenPayload>jwt.verify(token, privateSigningKey, { issuer: 'http://localhost:4401' });
+    const decoded: AccessTokenPayload = <AccessTokenPayload>jwt.verify(token, PRIVATE_SIGNING_KEY, { issuer: ISSUER });
     if (decoded.type !== "access") {
       throw new Error('Not a valid access token');
     }
@@ -194,6 +184,6 @@ app.post("/invalidate", async (req, res) => {
 });
 
 // start server
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}`)
 })
