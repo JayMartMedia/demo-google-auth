@@ -31,8 +31,6 @@ html{
   margin: 0px;
   font-size: 2em;
   text-align: center;
-}
-
-.hide {
-  display: none;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }

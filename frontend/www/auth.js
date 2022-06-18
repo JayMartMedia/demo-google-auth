@@ -1,124 +1,225 @@
-/* global window.accessToken, window.refreshToken, window.accessExp, apiHost*/
-function signIn(name, picture){
-  // hide google login button
-  document.querySelector("#google_login_btn").classList.add("hide");
-  // show login button
-  document.querySelector("#logout_btn").classList.remove("hide");
-  // show user-card
-  document.querySelector("#user-card").classList.remove("hide");
-  // show user details
-  if(name) {
-    document.querySelector('#user-id').innerHTML = name;
+(() => {
+  /**
+   * Things that need to be public:
+   * - showOneTap
+   * - logout: function
+   * - fetchAuth: function
+   * - userInfo: object
+   *
+   * Classes used:
+   * - auth-show-logged-in
+   * - auth-show-logged-out
+   * - auth-hide
+   *
+   * Id's used:
+   * - auth-google-login-btn
+   */
+  /*** Private Variables ***/
+  let _refreshToken;
+  let _refreshTokenExpiry;
+  let _accessToken;
+  let _accessTokenExpiry;
+
+  const CLIENT_ID = "403706356522-9l5kmo3oujjk8ho182ec3kts8k96d935.apps.googleusercontent.com";
+  const AUTH_SERVER_HOST = "http://localhost:4401";
+
+  /*** Private Methods ***/
+  // utility
+  function _extractPayload(jwt) {
+    const tokens = jwt.split(".");
+    // this atob may not work for decoding jwt?
+    const unencoded = atob(tokens[1]);
+    //const unencoded = Buffer.from(tokens[1], 'base64');
+    const payload = JSON.parse(unencoded);
+    return payload;
   }
-  if(picture) {
-    document.querySelector('#user-img').setAttribute("src", picture);
+
+  // dom manipulation
+  function _renderLoggedIn() {
+    _showWithClassName('auth-show-logged-in');
+    _hideWithClassName('auth-show-logged-out');
   }
-}
 
-function logout(){
-  window.accessToken = null;
-  window.refreshToken = null;
-  document.querySelector("#google_login_btn").classList.remove("hide");
-  document.querySelector("#logout_btn").classList.add("hide");
-  document.querySelector("#user-card").classList.add("hide");
-  document.querySelector("#user-card").classList.add("hide");
-  document.querySelector('#user-img').setAttribute("src", "");
-  document.querySelector('#user-id').innerHTML = "";
-  google.accounts.id.prompt();
-}
+  function _renderLoggedOut() {
+    _hideWithClassName('auth-show-logged-in');
+    _showWithClassName('auth-show-logged-out');
+  }
 
-// setup listeners for google auth
-function handleCredentialResponse(response) {
-  const googleJwt = response.credential;
-  getInternalTokens(googleJwt);
-  const payload = extractPayload(googleJwt);
-  signIn(payload.name, payload.picture);
-}
+  function _hideWithClassName(className) {
+    for (elem of document.getElementsByClassName(className)) {
+      elem.classList.add('auth-hide');
+    };
+  }
 
-window.onload = function () {
-  google.accounts.id.initialize({
-    client_id: "403706356522-9l5kmo3oujjk8ho182ec3kts8k96d935.apps.googleusercontent.com",
-    callback: handleCredentialResponse
-  });
-  google.accounts.id.renderButton(
-    document.getElementById("google_login_btn"),
-    { theme: "outline", size: "large" }  // customization attributes
-  );
-  google.accounts.id.prompt(); // also display the One Tap dialog
-}
+  function _showWithClassName(className) {
+    for (elem of document.getElementsByClassName(className)) {
+      elem.classList.remove('auth-hide');
+    };
+  }
 
-// wrap fetch and pass authorization header on request
-// do not use for external requests because that could give them an access token
-async function fetchAuth(url, options){
-  await refreshAccessTokenIfNeeded();
-  if(!options || !options.headers){
-    options = {
-      ...options,
-      headers: new Headers({
-        "Authorization": window.accessToken
-      }),
+  // state manipulation
+  function _setUserInfo(userInfo) {
+    window.auth.userInfo = userInfo;
+  }
+
+  function _getAccessToken() {
+    return _accessToken || sessionStorage.getItem('accessToken');
+  }
+
+  function _getAccessTokenExpiry() {
+    return _accessTokenExpiry || sessionStorage.getItem('accessTokenExpiry');
+  }
+
+  function _setAccessTokenAndExpiry(accessToken) {
+    _accessToken = accessToken;
+    sessionStorage.setItem('accessToken', accessToken);
+
+    const { exp } = _extractPayload(accessToken);
+    _accessTokenExpiry = exp;
+    sessionStorage.setItem('accessTokenExpiry', exp);
+  }
+
+  function _getRefreshToken() {
+    return _refreshToken || sessionStorage.getItem('refreshToken');
+  }
+
+  function _getRefreshTokenExpiry() {
+    return _refreshTokenExpiry || sessionStorage.getItem('refreshTokenExpiry');
+  }
+
+  function _setRefreshTokenAndExpiry(refreshToken) {
+    _refreshToken = refreshToken;
+    sessionStorage.setItem('refreshToken', refreshToken);
+
+    const { exp } = _extractPayload(refreshToken);
+    _refreshTokenExpiry = exp;
+    sessionStorage.setItem('refreshTokenExpiry', exp);
+  }
+
+  async function _refreshAccessTokenIfNeeded() {
+    if (_getAccessTokenExpiry() < Math.floor(Date.now() / 1000)) {
+      await _refreshTokens();
     }
-  }else if(!options.headers["Authorization"]){
-    options.headers.append("Authorization", window.accessToken);
   }
-  return fetch(url, options);
-}
 
-// auth flow
-async function getInternalTokens(_googleJwt) {
-  const res = await fetch(`${apiHost}/token`, {
-    method: "POST",
-    body: JSON.stringify({
-      googleJwt: _googleJwt
-    }),
-    headers: new Headers({
-      "Content-Type": "application/json"
-    }),
-  });
-  const json = await res.json();
-  window.accessToken = json.accessToken;
-  window.refreshToken = json.refreshToken;
-  setClientAccessTokenExpireTime(json.accessToken);
-}
-
-async function refreshTokens() {
-  const res = await fetch(`${apiHost}/refresh`, {
-    method: "POST",
-    body: JSON.stringify({
-      refreshToken: window.refreshToken
-    }),
-    headers: new Headers({
-      "Content-Type": "application/json"
-    }),
-  });
-  const json = await res.json();
-  window.accessToken = json.accessToken;
-  window.refreshToken = json.refreshToken;
-  setClientAccessTokenExpireTime(json.accessToken);
-}
-
-async function setClientAccessTokenExpireTime(_accessToken) {
-  const payload = extractPayload(_accessToken);
-  window.accessTokenExpiry = payload.exp;
-}
-
-// return true if access token expiry time is before the current time
-function isAccessTokenExpired() {
-  const currentTimeInSeconds = Math.floor(Date.now()/1000);
-  // check if accessToken will be expired in 5 seconds into the future
-  return window.accessTokenExpiry < currentTimeInSeconds + 5;
-}
-
-async function refreshAccessTokenIfNeeded() {
-  if(isAccessTokenExpired()){
-    await refreshTokens()
+  // auth methods
+  function _produceLoginEvent(accessToken) {
+    const payload = _extractPayload(accessToken);
+    const userInfo = {
+      userId: payload.userId,
+      picture: payload.picture
+    }
+    const event = new CustomEvent('logged-in', { detail: { userInfo } });
+    document.dispatchEvent(event);
   }
-}
 
-function extractPayload(jwt) {
-  const tokens = jwt.split(".");
-  // this atob may not work for decoding jwt?
-  const unencoded = atob(tokens[1]);
-  const payload = JSON.parse(unencoded);
-  return payload;
-}
+  async function _googleLoginCallback(response) {
+    const googleJwt = response.credential;
+
+    // get tokens for internal use
+    const res = await fetch(`${AUTH_SERVER_HOST}/token`, {
+      method: "POST",
+      body: JSON.stringify({
+        googleJwt
+      }),
+      headers: new Headers({
+        "Content-Type": "application/json"
+      }),
+    });
+
+    // save values
+    const { accessToken, refreshToken } = await res.json();
+    _setRefreshTokenAndExpiry(refreshToken);
+    _setAccessTokenAndExpiry(accessToken);
+
+    // login finished, produce login event
+    _produceLoginEvent(accessToken);
+    _renderLoggedIn();
+
+    // set userInfo
+    const { userId, picture } = _extractPayload(accessToken);
+    _setUserInfo({ userId, picture });
+  }
+
+  async function _refreshTokens() {
+    const res = await fetch(`${AUTH_SERVER_HOST}/refresh`, {
+      method: "POST",
+      body: JSON.stringify({
+        refreshToken: _getRefreshToken()
+      }),
+      headers: new Headers({
+        "Content-Type": "application/json"
+      }),
+    });
+    const { accessToken, refreshToken } = await res.json();
+    _setRefreshTokenAndExpiry(refreshToken);
+    _setAccessTokenAndExpiry(accessToken);
+  }
+
+  function _configureGoogleAccount() {
+    google.accounts.id.initialize({
+      client_id: CLIENT_ID,
+      callback: _googleLoginCallback
+    });
+    google.accounts.id.renderButton(
+      document.getElementById("auth-google-login-btn"),
+      { theme: "outline", size: "large" }
+    );
+  }
+
+  /*** Public Methods ***/
+  function logout() {
+    sessionStorage.removeItem('refreshToken');
+    sessionStorage.removeItem('refreshTokenExpiry');
+    sessionStorage.removeItem('accessToken');
+    sessionStorage.removeItem('accessTokenExpiry');
+    _refreshToken = null;
+    _refreshTokenExpiry = null;
+    _accessToken = null;
+    _accessTokenExpiry = null;
+    _renderLoggedOut();
+  }
+
+  function showOneTap() {
+    google.accounts.id.prompt();
+  }
+
+  async function fetchAuth(url, options) {
+    await _refreshAccessTokenIfNeeded();
+    if (!options || !options.headers) {
+      options = {
+        ...options,
+        headers: new Headers({
+          "Authorization": _getAccessToken()
+        }),
+      }
+    } else if (!options.headers["Authorization"]) {
+      options.headers.append("Authorization", _getAccessToken());
+    }
+    return fetch(url, options);
+  }
+
+  /*** Initialization ***/
+  function _setup() {
+    window.auth = {
+      logout,
+      showOneTap,
+      fetchAuth,
+      userInfo: null
+    }
+
+    // check whether logged in or out
+    if (_getRefreshTokenExpiry() > Math.floor(Date.now() / 1000)) {
+      // refreshToken is still valid
+      _produceLoginEvent(_getAccessToken());
+      _renderLoggedIn();
+    } else {
+      _renderLoggedOut();
+      showOneTap();
+    }
+  }
+  window.onload = () => {
+    _configureGoogleAccount();
+    _setup();
+  }
+})();
