@@ -3,9 +3,8 @@ import * as cors from "cors";
 import * as jwt from "jsonwebtoken";
 import * as swaggerUi from "swagger-ui-express";
 import * as swaggerDocument from "./swagger.json";
-import { removeMatchesFromImmutableArray } from "./utils/removeMatchesFromImmutableArray";
 import { timestring } from "./utils/dateUtils";
-import { AccessTokenPayload, GoogleJwtMeta, GoogleJwtPayload, RefreshTokenMeta, RefreshTokenPayload } from "./types/auth-interfaces";
+import { AccessTokenPayload, GoogleJwtPayload, RefreshTokenPayload } from "./types/auth-interfaces";
 import { ITokenRepository } from "./repository/ITokenRepository";
 import { tokenInMemoryRepository } from "./repository/tokenInMemoryRepository";
 
@@ -32,13 +31,15 @@ const client = new OAuth2Client(CLIENT_ID);
 
 const tokenRepository: ITokenRepository = new tokenInMemoryRepository();
 
-function generateAccessToken(data: { userId: string, picture: string }): string {
+function generateAccessToken(data: { userId: string, picture: string, name: string, email: string }): string {
   const quarterHourInSeconds = 60 * 15;
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
   const expiryTime = issuedAtTime + quarterHourInSeconds;
   const payload: AccessTokenPayload = {
     userId: data.userId,
+    name: data.name,
+    email: data.email,
     picture: data.picture,
     iss: issuer,
     iat: issuedAtTime,
@@ -49,7 +50,7 @@ function generateAccessToken(data: { userId: string, picture: string }): string 
   return token;
 }
 
-function generateRefreshToken(data: { userId: string, picture: string }): string {
+function generateRefreshToken(data: { userId: string, picture: string, name: string, email: string }): string {
   const oneDayInSeconds = 60 * 60 * 24;
   const issuer = "http://localhost:4401"
   const issuedAtTime = Math.floor(Date.now() / 1000);
@@ -57,6 +58,8 @@ function generateRefreshToken(data: { userId: string, picture: string }): string
   const payload: RefreshTokenPayload = {
     userId: data.userId,
     picture: data.picture,
+    name: data.name,
+    email: data.email,
     iss: issuer,
     iat: issuedAtTime,
     exp: expiryTime
@@ -140,8 +143,8 @@ app.post("/token", async (req, res) => {
   if (await verifyGoogleJwt(googleJwt)) {
     const payload: GoogleJwtPayload = <GoogleJwtPayload>jwt.decode(googleJwt, { json: true });
     await tokenRepository.addUsedGoogleJwtMeta({ token: googleJwt, exp: payload.exp });
-    const newAccessToken = generateAccessToken({ userId: `g:${payload.email}`, picture: payload.picture });
-    const newRefreshToken = generateRefreshToken({ userId: `g:${payload.email}`, picture: payload.picture });
+    const newAccessToken = generateAccessToken({ ...payload, userId: `g:${payload.email}` });
+    const newRefreshToken = generateRefreshToken({ ...payload, userId: `g:${payload.email}` });
     await tokenRepository.insertRefreshTokenMeta({
       user: payload.email,
       token: newRefreshToken
@@ -161,8 +164,8 @@ app.post("/refresh", async (req, res) => {
   const refreshToken = req.body.refreshToken;
   const payload: RefreshTokenPayload = <RefreshTokenPayload>jwt.decode(refreshToken, { json: true, complete: false });
   if (await verifyRefreshToken(refreshToken)) {
-    const newAccessToken = generateAccessToken({ userId: payload.userId, picture: payload.picture });
-    const newRefreshToken = generateRefreshToken({ userId: payload.userId, picture: payload.picture });
+    const newAccessToken = generateAccessToken(payload);
+    const newRefreshToken = generateRefreshToken(payload);
     await tokenRepository.deleteRefreshTokenMeta(refreshToken);
     await tokenRepository.insertRefreshTokenMeta({
       user: payload.email,

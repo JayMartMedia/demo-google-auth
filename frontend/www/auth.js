@@ -107,6 +107,8 @@
     const payload = _extractPayload(accessToken);
     const userInfo = {
       userId: payload.userId,
+      email: payload.email,
+      name: payload.name,
       picture: payload.picture
     }
     const event = new CustomEvent('logged-in', { detail: { userInfo } });
