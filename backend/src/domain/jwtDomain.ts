@@ -1,4 +1,4 @@
-import { ITokenRepository } from "../repository/ITokenRepository";
+import { ITokenRepository } from "../repositories/ITokenRepository";
 import { AccessTokenPayload, RefreshTokenPayload } from "../types/auth-interfaces";
 import * as jwt from "jsonwebtoken";
 import { ACCESS_TOKEN_LENGTH, ISSUER, PRIVATE_SIGNING_KEY, REFRESH_TOKEN_LENGTH, CLIENT_ID } from "../constants";
