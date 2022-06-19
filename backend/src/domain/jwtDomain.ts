@@ -52,7 +52,7 @@ export function setupJwtDomain(tokenRepository: ITokenRepository, client: OAuth2
     }
   }
 
-  function verifyAccessToken(token: string): boolean {
+  function verifyAccessToken(token: string): IUserInfo | false {
     try {
       if (token === 'null') {
         throw new Error('authorization header null');
@@ -61,7 +61,13 @@ export function setupJwtDomain(tokenRepository: ITokenRepository, client: OAuth2
       if (decoded.type !== "access") {
         throw new Error('Not a valid access token');
       }
-      return true;
+      const userInfo: IUserInfo = {
+        userId: decoded.userId,
+        name: decoded.name,
+        email: decoded.email,
+        picture: decoded.picture
+      }
+      return userInfo;
     } catch (e) {
       console.error(`Access token invalid: ${e.message}`);
       return false;
