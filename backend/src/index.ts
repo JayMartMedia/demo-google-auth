@@ -2,6 +2,7 @@ import * as express from "express";
 import * as cors from "cors";
 import * as swaggerUi from "swagger-ui-express";
 import * as swaggerDocument from "./swagger.json";
+import * as morgan from "morgan";
 import { ITokenRepository } from "./repository/ITokenRepository";
 import { tokenInMemoryRepository } from "./repository/tokenInMemoryRepository";
 import { OAuth2Client } from "google-auth-library";
@@ -17,6 +18,7 @@ app.use(cors({
   origin: ALLOWED_ORIGINS
 }));
 app.use(express.json());
+app.use(morgan('tiny'));
 
 // setup swagger
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));

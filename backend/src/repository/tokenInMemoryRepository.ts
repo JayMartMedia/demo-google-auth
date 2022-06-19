@@ -1,12 +1,9 @@
 import { GoogleJwtMeta, RefreshTokenMeta } from "../types/auth-interfaces";
-import { removeMatchesFromImmutableArray } from "../utils/removeMatchesFromImmutableArray";
 import { ITokenRepository } from "./ITokenRepository";
 
 export class tokenInMemoryRepository implements ITokenRepository {
-  private _refreshTokens: RefreshTokenMeta[] = [];
-  private _usedGoogleJwts: GoogleJwtMeta[] = [];
-
-  /** Private Methods **/
+  _refreshTokens: RefreshTokenMeta[] = [];
+  _usedGoogleJwts: GoogleJwtMeta[] = [];
 
   /** Public Methods **/
   // refresh tokens
@@ -42,7 +39,6 @@ export class tokenInMemoryRepository implements ITokenRepository {
   }
 
   checkForUsedGoogleJwtMeta = async function (token: string) {
-    console.log(token);
     return this._usedGoogleJwts.some((usedGoogleJwt: GoogleJwtMeta) => {
       return usedGoogleJwt.token === token;
     })

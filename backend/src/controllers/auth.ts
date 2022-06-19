@@ -7,7 +7,6 @@ import { timestring } from '../utils/dateUtils';
 export function setupAuthController(app: Express, tokenRepository: ITokenRepository, jwtDomain: IJwtDomain) {
   // get new refresh and access tokens using a google JWT
   app.post("/token", async (req, res) => {
-    console.log(`${timestring()}: Request to endpoint: /token`);
     const googleJwt = req.body.googleJwt;
     if (!googleJwt) return res.sendStatus(401);
     if (await tokenRepository.checkForUsedGoogleJwtMeta(googleJwt)) {
@@ -33,7 +32,6 @@ export function setupAuthController(app: Express, tokenRepository: ITokenReposit
 
   // get new refresh and access tokens using a refresh token
   app.post("/refresh", async (req, res) => {
-    console.log(`${timestring()}: Request to endpoint: /refresh`);
     const refreshToken = req.body.refreshToken;
     const payload: RefreshTokenPayload = <RefreshTokenPayload>jwt.decode(refreshToken, { json: true, complete: false });
     if (await jwtDomain.verifyRefreshToken(refreshToken)) {
@@ -55,13 +53,12 @@ export function setupAuthController(app: Express, tokenRepository: ITokenReposit
 
   // invalidate a single refresh key (useful for logging out)
   app.post("/invalidate", async (req, res) => {
-    console.log(`${timestring()}: Request to endpoint: /invalidate`);
     try {
       const refreshToken = req.body.refreshToken;
       await tokenRepository.deleteRefreshTokenMeta(refreshToken);
       return res.sendStatus(204);
     } catch (e) {
-      console.error(e);
+      console.error(`Failed to invalidate: ${e.message}`);
       return res.sendStatus(500);
     }
   });

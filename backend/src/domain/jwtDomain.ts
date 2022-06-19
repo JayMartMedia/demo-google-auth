@@ -46,21 +46,24 @@ export function setupJwtDomain(tokenRepository: ITokenRepository, client: OAuth2
         throw new Error('Refresh token does not exist or has been invalidated');
       };
       return true;
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(`Refresh token invalid ${e.message}`);
       return false;
     }
   }
 
   function verifyAccessToken(token: string): boolean {
     try {
+      if (token === 'null') {
+        throw new Error('authorization header null');
+      }
       const decoded: AccessTokenPayload = <AccessTokenPayload>jwt.verify(token, PRIVATE_SIGNING_KEY, { issuer: ISSUER });
       if (decoded.type !== "access") {
         throw new Error('Not a valid access token');
       }
       return true;
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      console.error(`Access token invalid: ${e.message}`);
       return false;
     }
   }
@@ -74,7 +77,7 @@ export function setupJwtDomain(tokenRepository: ITokenRepository, client: OAuth2
       });
       return true;
     } catch (e) {
-      console.error(e);
+      console.error(`Google JWT invalid ${e.message}`);
       return false;
     }
   }

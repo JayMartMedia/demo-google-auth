@@ -97,6 +97,8 @@
   }
 
   async function _refreshAccessTokenIfNeeded() {
+    // TODO: ideally, we would prevent the request if not logged in
+    if (!_getRefreshToken()) return;
     if (_getAccessTokenExpiry() < Math.floor(Date.now() / 1000)) {
       await _refreshTokens();
     }
