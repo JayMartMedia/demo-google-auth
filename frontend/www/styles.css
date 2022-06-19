@@ -27,9 +27,8 @@ html{
   border-radius: 100%;
 }
 
-#user-id {
-  margin: 0px;
-  font-size: 2em;
+#user-email, #user-name-wrapper {
+  margin: .5em;
   text-align: center;
   text-overflow: ellipsis;
   overflow: hidden;

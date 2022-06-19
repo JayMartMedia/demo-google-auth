@@ -4,7 +4,8 @@ const apiHost = "http://localhost:4401";
 
 document.addEventListener("logged-in", (obj) => {
   const userInfo = obj.detail.userInfo;
-  document.getElementById("user-id").innerText = userInfo.userId;
+  document.getElementById("user-name").innerText = userInfo.name;
+  document.getElementById("user-email").innerText = userInfo.email;
   document.getElementById("user-img").setAttribute('src', userInfo.picture);
 });
 

@@ -10,6 +10,8 @@ interface GoogleJwtMeta {
 }
 interface RefreshTokenPayload extends jwt.JwtPayload {
   userId: string, // user id is in format of `{id of platform}:{email}` for example: g:email@gmail.com
+  email: string,
+  name: string,
   picture: string,
   iss: string,
   iat: number,
@@ -17,6 +19,8 @@ interface RefreshTokenPayload extends jwt.JwtPayload {
 }
 interface AccessTokenPayload extends jwt.JwtPayload {
   userId: string, // user id is in format of `{id of platform}:{email}` for example: g:email@gmail.com
+  email: string,
+  name: string,
   picture: string,
   iss: string,
   iat: number,
