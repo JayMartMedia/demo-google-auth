@@ -12,6 +12,7 @@ import { setupJwtDomain } from "./domain/jwtDomain";
 import { setupHealthcheckController } from "./controllers/healthcheck";
 import { setupSecureController } from "./controllers/secure";
 import { setupAuthenticateMiddleware } from "./middleware/authenticate";
+import { tokenMongoRepository } from "./repositories/tokenMongoRepository";
 
 // setup express
 const app = express();
@@ -19,14 +20,15 @@ app.use(cors({
   origin: ALLOWED_ORIGINS
 }));
 app.use(express.json());
-app.use(morgan('tiny'));
+app.use(morgan('dev'));
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // configure google auth
 const client = new OAuth2Client(CLIENT_ID);
 
 // setup services (for basic dependency injection)
-const tokenRepository: ITokenRepository = new tokenInMemoryRepository();
+// const tokenRepository: ITokenRepository = new tokenInMemoryRepository(); // swap this with the line below if you don't want to setup mongo
+const tokenRepository: ITokenRepository = new tokenMongoRepository();
 const jwtDomain: IJwtDomain = setupJwtDomain(tokenRepository, client);
 const middleware = setupAuthenticateMiddleware(jwtDomain);
 
