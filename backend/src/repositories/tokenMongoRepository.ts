@@ -1,11 +1,12 @@
 import { ITokenRepository } from "./ITokenRepository";
 import { GoogleJwtMeta, RefreshTokenMeta } from "../types/auth-interfaces";
 import { Collection, Db, MongoClient } from "mongodb";
+import { env } from "../config/env";
 
-const mongoConnectionString = 'mongodb://localhost:27017';
-const mongoDbName = 'demo-auth';
-const refreshCollectionName = 'refreshTokens';
-const usedGoogleJwtCollectionName = 'usedGoogleJwts';
+const mongoConnectionString = env.dbConnectionString;
+const mongoDbName = env.dbName;
+const refreshCollectionName = env.refreshTokenCollectionName;
+const usedGoogleJwtCollectionName = env.usedGoogleJwtCollectionName;
 
 export class tokenMongoRepository implements ITokenRepository {
   _refreshCollection: Collection;
