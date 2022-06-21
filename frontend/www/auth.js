@@ -160,7 +160,8 @@
     _setAccessTokenAndExpiry(accessToken);
   }
 
-  function _configureGoogleAccount() {
+  /*** Public Methods ***/
+  function configureGoogleAccount() {
     google.accounts.id.initialize({
       client_id: CLIENT_ID,
       callback: _googleLoginCallback
@@ -171,7 +172,6 @@
     );
   }
 
-  /*** Public Methods ***/
   function logout() {
     sessionStorage.removeItem('refreshToken');
     sessionStorage.removeItem('refreshTokenExpiry');
@@ -209,6 +209,7 @@
       logout,
       showOneTap,
       fetchAuth,
+      configureGoogleAccount,
       userInfo: null
     }
 
@@ -223,7 +224,7 @@
     }
   }
   window.onload = () => {
-    _configureGoogleAccount();
+    configureGoogleAccount();
     _setup();
   }
 })();
