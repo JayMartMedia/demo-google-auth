@@ -1,5 +1,5 @@
 import { Express } from 'express';
-import { ITokenRepository } from '../repository/ITokenRepository';
+import { ITokenRepository } from '../repositories/ITokenRepository';
 import { GoogleJwtPayload, RefreshTokenPayload } from '../types/auth-interfaces';
 import * as jwt from "jsonwebtoken";
 import { timestring } from '../utils/dateUtils';

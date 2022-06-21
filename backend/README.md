@@ -5,6 +5,9 @@ https://developers.google.com/identity/gsi/web/guides/verify-google-id-token
 
 # Local Setup
 
+### To start the local mongo db (not needed if using tokenInMemoryRepository)
+> `docker run -d -p 27017:27017 --name mongo-db mongo:latest`
+
 ### To run without hot-reload (used to just run the app)
 > ```sh
 > npm install
