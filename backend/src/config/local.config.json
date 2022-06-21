@@ -2,5 +2,12 @@
   "dbConnectionString": "mongodb://localhost:27017",
   "dbName": "demo-auth",
   "refreshTokenCollectionName": "refreshTokens",
-  "usedGoogleJwtCollectionName": "usedGoogleJwts"
+  "usedGoogleJwtCollectionName": "usedGoogleJwts",
+  "googleClientId": "403706356522-9l5kmo3oujjk8ho182ec3kts8k96d935.apps.googleusercontent.com",
+  "allowedOrigins": "http://localhost:4400",
+  "privateSigningKey": "replace with your signing key",
+  "port": "4401",
+  "issuer": "http://localhost:4401",
+  "accessTokenLength": "900",
+  "refreshTokenLength": "86400"
 }

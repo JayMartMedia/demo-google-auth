@@ -6,25 +6,25 @@ import * as morgan from "morgan";
 import { ITokenRepository } from "./repositories/ITokenRepository";
 import { tokenInMemoryRepository } from "./repositories/tokenInMemoryRepository";
 import { OAuth2Client } from "google-auth-library";
-import { CLIENT_ID, ALLOWED_ORIGINS, PORT } from "./constants";
 import { setupAuthController } from "./controllers/auth";
 import { setupJwtDomain } from "./domain/jwtDomain";
 import { setupHealthcheckController } from "./controllers/healthcheck";
 import { setupSecureController } from "./controllers/secure";
 import { setupAuthenticateMiddleware } from "./middleware/authenticate";
 import { tokenMongoRepository } from "./repositories/tokenMongoRepository";
+import { env } from "./config/env";
 
 // setup express
 const app = express();
 app.use(cors({
-  origin: ALLOWED_ORIGINS
+  origin: env.allowedOrigins
 }));
 app.use(express.json());
 app.use(morgan('dev'));
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // configure google auth
-const client = new OAuth2Client(CLIENT_ID);
+const client = new OAuth2Client(env.googleClientId);
 
 // setup services (for basic dependency injection)
 // const tokenRepository: ITokenRepository = new tokenInMemoryRepository(); // swap this with the line below if you don't want to setup mongo
@@ -38,6 +38,6 @@ setupSecureController(app, middleware);
 setupHealthcheckController(app);
 
 // start server
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`)
+app.listen(env.port, () => {
+  console.log(`Example app listening on port ${env.port}`)
 })

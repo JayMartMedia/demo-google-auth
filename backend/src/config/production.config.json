@@ -1,6 +1,13 @@
 {
-  "dbConnectionString": "from system environment variables",
+  "dbConnectionString": "replaced by system env var",
   "dbName": "demo-auth",
   "refreshTokenCollectionName": "refreshTokens",
-  "usedGoogleJwtCollectionName": "usedGoogleJwts"
+  "usedGoogleJwtCollectionName": "usedGoogleJwts",
+  "googleClientId": "replaced by system env var",
+  "allowedOrigins": "http://localhost:4400",
+  "privateSigningKey": "replaced by system env var",
+  "port": "4401",
+  "issuer": "replaced by system env var",
+  "accessTokenLength": "900",
+  "refreshTokenLength": "86400"
 }

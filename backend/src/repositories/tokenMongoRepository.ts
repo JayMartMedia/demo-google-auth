@@ -1,6 +1,6 @@
 import { ITokenRepository } from "./ITokenRepository";
 import { GoogleJwtMeta, RefreshTokenMeta } from "../types/auth-interfaces";
-import { Collection, Db, MongoClient } from "mongodb";
+import { Collection, MongoClient } from "mongodb";
 import { env } from "../config/env";
 
 const mongoConnectionString = env.dbConnectionString;

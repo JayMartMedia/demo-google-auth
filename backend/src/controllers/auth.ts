@@ -2,7 +2,6 @@ import { Express } from 'express';
 import { ITokenRepository } from '../repositories/ITokenRepository';
 import { GoogleJwtPayload, RefreshTokenPayload } from '../types/auth-interfaces';
 import * as jwt from "jsonwebtoken";
-import { timestring } from '../utils/dateUtils';
 
 export function setupAuthController(app: Express, tokenRepository: ITokenRepository, jwtDomain: IJwtDomain) {
   // get new refresh and access tokens using a google JWT
