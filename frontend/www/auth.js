@@ -96,7 +96,7 @@
     sessionStorage.setItem('refreshTokenExpiry', exp);
   }
 
-  async function _refreshAccessTokenIfNeeded() {
+  async function refreshAccessTokenIfNeeded() {
     // TODO: ideally, we would prevent the request if not logged in
     if (!_getRefreshToken()) return;
     if (_getAccessTokenExpiry() < Math.floor(Date.now() / 1000)) {
@@ -141,8 +141,8 @@
     _renderLoggedIn();
 
     // set userInfo
-    const { userId, picture } = _extractPayload(accessToken);
-    _setUserInfo({ userId, picture });
+    const { userId, picture, name, email } = _extractPayload(accessToken);
+    _setUserInfo({ userId, picture, name, email });
   }
 
   async function _refreshTokens() {
@@ -189,7 +189,7 @@
   }
 
   async function fetchAuth(url, options) {
-    await _refreshAccessTokenIfNeeded();
+    await refreshAccessTokenIfNeeded();
     if (!options || !options.headers) {
       options = {
         ...options,
@@ -210,6 +210,7 @@
       showOneTap,
       fetchAuth,
       configureGoogleAccount,
+      refreshAccessTokenIfNeeded,
       userInfo: null
     }
 
