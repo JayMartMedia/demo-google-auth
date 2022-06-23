@@ -48,7 +48,6 @@ export class tokenMongoRepository implements ITokenRepository {
     const result = await refreshCollection.findOne({
       token: token
     });
-    console.log(result);
     return !!result; // coerce into boolean
   };
 
@@ -63,7 +62,6 @@ export class tokenMongoRepository implements ITokenRepository {
     const result = await usedGoogleCollection.findOne({
       token: token
     });
-    console.log(result);
     return !!result; // coerce into boolean
   }
 

@@ -47,7 +47,6 @@ function getAllowedOrigins () {
   const allowedOrigins = process.env.allowedOrigins?.split(',')
     || config[environment].allowedOrigins?.split(',');
   if(!allowedOrigins) throw new Error('allowedOrigins must be provided');
-  console.log(allowedOrigins)
   return allowedOrigins;
 }
 

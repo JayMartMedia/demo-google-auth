@@ -35,6 +35,14 @@
   }
 
   // dom manipulation
+  function _addStyles() {
+    var css = '.auth-hide { display: none; }',
+    head = document.head || document.getElementsByTagName('head')[0],
+    style = document.createElement('style');
+    head.appendChild(style);
+    style.appendChild(document.createTextNode(css));
+  }
+
   function _renderLoggedIn() {
     _showWithClassName('auth-show-logged-in');
     _hideWithClassName('auth-show-logged-out');
@@ -117,6 +125,11 @@
     document.dispatchEvent(event);
   }
 
+  function _produceLogoutEvent() {
+    const event = new CustomEvent('logged-out');
+    document.dispatchEvent(event);
+  }
+
   async function _googleLoginCallback(response) {
     const googleJwt = response.credential;
 
@@ -181,6 +194,7 @@
     _refreshTokenExpiry = null;
     _accessToken = null;
     _accessTokenExpiry = null;
+    _produceLogoutEvent();
     _renderLoggedOut();
   }
 
@@ -213,6 +227,8 @@
       refreshAccessTokenIfNeeded,
       userInfo: null
     }
+
+    _addStyles();
 
     // check whether logged in or out
     if (_getRefreshTokenExpiry() > Math.floor(Date.now() / 1000)) {
