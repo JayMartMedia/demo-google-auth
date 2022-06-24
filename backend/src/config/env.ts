@@ -58,7 +58,7 @@ function getPrivateSigningKey () {
 }
 
 function getPort () {
-  const port = process.env.port
+  const port = process.env.PORT
     || config[environment].port;
   if(!port) throw new Error('port must be provided');
 
