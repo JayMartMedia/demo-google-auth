@@ -20,7 +20,7 @@ app.use(cors({
   origin: env.allowedOrigins
 }));
 app.use(express.json());
-app.use(morgan('dev'));
+app.use(morgan('common'));
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // configure google auth
