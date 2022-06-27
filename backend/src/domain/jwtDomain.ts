@@ -18,7 +18,7 @@ export function setupJwtDomain(tokenRepository: ITokenRepository, client: OAuth2
       exp: expiryTime,
       type: "access"
     }
-    const token: string = jwt.sign(payload, env.privateSigningKey, { algorithm: 'HS256' });
+    const token: string = jwt.sign(payload, env.privateAccessSigningKey, { algorithm: 'HS256' });
     return token;
   }
 
@@ -34,13 +34,13 @@ export function setupJwtDomain(tokenRepository: ITokenRepository, client: OAuth2
       iat: issuedAtTime,
       exp: expiryTime
     }
-    const token: string = jwt.sign(payload, env.privateSigningKey, { algorithm: 'HS256' });
+    const token: string = jwt.sign(payload, env.privateRefreshSigningKey, { algorithm: 'HS256' });
     return token;
   }
 
   async function verifyRefreshToken(token: string): Promise<boolean> {
     try {
-      const decoded: RefreshTokenPayload = <RefreshTokenPayload>jwt.verify(token, env.privateSigningKey, { issuer: env.issuer });
+      const decoded: RefreshTokenPayload = <RefreshTokenPayload>jwt.verify(token, env.privateRefreshSigningKey, { issuer: env.issuer });
       if (!(await tokenRepository.checkForRefreshTokenMeta(token))) {
         await tokenRepository.deleteRefreshTokenMetasForUser(decoded.email);
         throw new Error('Refresh token does not exist or has been invalidated');
@@ -57,7 +57,7 @@ export function setupJwtDomain(tokenRepository: ITokenRepository, client: OAuth2
       if (token === 'null') {
         throw new Error('authorization header null');
       }
-      const decoded: AccessTokenPayload = <AccessTokenPayload>jwt.verify(token, env.privateSigningKey, { issuer: env.issuer });
+      const decoded: AccessTokenPayload = <AccessTokenPayload>jwt.verify(token, env.privateAccessSigningKey, { issuer: env.issuer });
       if (decoded.type !== "access") {
         throw new Error('Not a valid access token');
       }
