@@ -1,13 +1,8 @@
 {
-  "dbConnectionString": "replaced by system env var",
-  "dbName": "demo-auth",
-  "refreshTokenCollectionName": "refreshTokens",
-  "usedGoogleJwtCollectionName": "usedGoogleJwts",
-  "googleClientId": "replaced by system env var",
-  "allowedOrigins": "http://localhost:4400",
-  "privateSigningKey": "replaced by system env var",
-  "port": "4401",
-  "issuer": "replaced by system env var",
-  "accessTokenLength": "900",
-  "refreshTokenLength": "86400"
+  "DB_NAME": "jmm-google-auth",
+  "REFRESH_TOKEN_COLLECTION_NAME": "refreshTokens",
+  "USED_GOOGLE_JWT_COLLECTION_NAME": "usedGoogleJwts",
+  "PORT": "4401",
+  "ACCESS_TOKEN_LENGTH": "900",
+  "REFRESH_TOKEN_LENGTH": "86400"
 }
