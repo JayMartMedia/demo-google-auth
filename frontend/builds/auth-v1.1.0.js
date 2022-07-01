@@ -6,6 +6,7 @@
    * - fetchAuth: function
    * - configureGoogleAccount: function
    * - refreshAccessTokenIfNeeded: function
+   * - render: function
    * - userInfo: object
    *
    * Classes used:
@@ -219,20 +220,7 @@
     return fetch(url, options);
   }
 
-  /*** Initialization ***/
-  function _setup() {
-    window.auth = {
-      logout,
-      showOneTap,
-      fetchAuth,
-      configureGoogleAccount,
-      refreshAccessTokenIfNeeded,
-      userInfo: null
-    }
-
-    _addStyles();
-
-    // check whether logged in or out
+  function render() {
     if (_getRefreshTokenExpiry() > Math.floor(Date.now() / 1000)) {
       // refreshToken is still valid
       _produceLoginEvent(_getAccessToken());
@@ -241,6 +229,22 @@
       _renderLoggedOut();
       showOneTap();
     }
+  }
+
+  /*** Initialization ***/
+  function _setup() {
+    window.auth = {
+      logout,
+      showOneTap,
+      fetchAuth,
+      configureGoogleAccount,
+      refreshAccessTokenIfNeeded,
+      render,
+      userInfo: null
+    }
+
+    _addStyles();
+    render()
   }
   window.onload = () => {
     configureGoogleAccount();
