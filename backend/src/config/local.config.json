@@ -8,7 +8,7 @@
   "PRIVATE_ACCESS_SIGNING_KEY": "replace with your signing key for access token",
   "PRIVATE_REFRESH_SIGNING_KEY": "replace with your signing key for refresh token",
   "PORT": "4401",
-  "ISSUER": "http://localhost:4401",
+  "ISSUER": "https://localhost:4401",
   "ACCESS_TOKEN_LENGTH": "900",
   "REFRESH_TOKEN_LENGTH": "86400"
 }
